@@ -1,21 +1,12 @@
 import express, { Request } from 'express'
-import {prisma} from 'db/client'
+import userRouter from './routes/userRoute'
 
 const app = express()
 
 app.use(express.json())
 
-app.post('/signup', (req, res) => {
-    const {username, password} = req.body
-    prisma.user.create({
-        data: {
-            username,
-            password
-        }
-    })
-    res.json({
-        msg: "Signed up"
-    })
-})
+app.use('/api/v1/user', userRouter)
 
-app.listen(3000)
+app.listen(3000, () => {
+    console.log(`Server is running on http://localhost:3000`)
+})

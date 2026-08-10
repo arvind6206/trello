@@ -11,9 +11,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "db": "*",
     "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "db": "*"
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",

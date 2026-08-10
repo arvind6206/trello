@@ -17,6 +17,40 @@ datasource db {
 
 model User{
   id               String              @id     @default(uuid())
-  username         String
+  username         String               @unique
   password         String
 }
+
+model Org{
+  id                String              @id    @default(uuid())
+  orgname           String    
+  description       String
+}
+
+model Membership{
+  id                String              @id    @default(uuid())
+  userId            Int
+  orgId             Int
+  role              String
+}
+
+model Boards{
+  id                String               @id    @default(uuid())
+  title             String
+  orgId             Int
+}
+
+model sections{
+  id              String              @id       @default(uuid())
+  title           String    
+  boardId         Int
+}
+
+model Issue{
+  id                String                @id    @default(uuid())
+  title             String
+  description       String
+  boardId           Int
+  sectionId         Int
+}
+
