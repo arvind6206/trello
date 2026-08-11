@@ -26,3 +26,35 @@ export const createOrgController = async(req: Request, res: Response) => {
         console.log(error)
     }
 }
+
+export const deletOrgController = async(req: Request<{orgId: string}>, res: Response) => {
+    try {
+        const {orgId} = req.params;
+        const findOrg = await prisma.org.findUnique({
+            where: {
+                id: orgId,
+            }
+        })
+
+        if(!findOrg){
+            return res.status(400).json({
+                msg: "Org is not found"
+            })
+        }
+
+        await prisma.org.delete({
+            where: {
+                id: orgId
+            }
+        })
+
+        return res.status(200).json({
+            msg: "Org deleted successfully"
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        })
+    }
+}

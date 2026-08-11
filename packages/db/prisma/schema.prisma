@@ -29,28 +29,35 @@ model Org{
 
 model Membership{
   id                String              @id    @default(uuid())
-  userId            Int
-  orgId             Int
+  userId            Int                 @unique
+  user              User                @relation(fields: [userId], references: [id])
+  orgId             Int                 @unique
+  org               Org                 @relation(fields: [orgId], references: [id])
   role              String
+  accepted          Boolean
 }
 
 model Boards{
-  id                String               @id    @default(uuid())
+  id                String              @id    @default(uuid())
   title             String
-  orgId             Int
+  orgId             Int                 @unique
+  org               Org                 @relation(fields: [orgId], references: [id])
 }
 
-model sections{
-  id              String              @id       @default(uuid())
+model Sections{
+  id              String                @id       @default(uuid())
   title           String    
-  boardId         Int
+  boardId         Int                   @unique
+  board           Boards                @relation(fields: [boardId], references: [id])
 }
 
 model Issue{
-  id                String                @id    @default(uuid())
+  id                String               @id    @default(uuid())
   title             String
   description       String
-  boardId           Int
-  sectionId         Int
+  boardId           Int                  @unique
+  board           Boards                 @relation(fields: [boardId], references: [id])
+  sectionId         Int                  @unique
+  section           Sections             @relation(fields: [sectionId], references: [id])
 }
 
