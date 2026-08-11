@@ -115,3 +115,52 @@ export const deleteBoardController = async (req: Request<{boardId: string}>, res
         })
     }
 }
+
+export const updateBoardController = async (req: Request<{boardId: string}>, res: Response) => {
+    try {
+        const {boardId, title} = req.body
+        if(!boardId){
+            return res.status(400).json({
+                msg: "boardId is required"
+            })
+        }
+
+        if(!title){
+            return res.status(400).json({
+                msg: "title is required"
+            })
+        }
+
+        const findBoard = await prisma.sections.findUnique({
+            where: {
+                id: boardId
+            }
+        })
+
+        if(!findBoard){
+            return res.status(400).json({
+                msg: "Board not found"
+            })
+        }
+
+        const updatedBoard = await prisma.sections.update({
+            where: {
+                id: boardId
+            },
+             
+                data: {
+                    title
+                }
+            
+        })
+        return res.status(200).json({
+            msg: "section updated successfully",
+            updatedBoard
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        })
+    }
+}

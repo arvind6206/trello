@@ -116,3 +116,52 @@ export const deleteSectionController = async (req: Request, res: Response) => {
         })
     }
 }
+
+export const updateSectionController = async (req: Request<{sectionId: string}>, res: Response) => {
+    try {
+        const {sectionId, title} = req.body
+        if(!sectionId){
+            return res.status(400).json({
+                msg: "sectionId is required"
+            })
+        }
+
+        if(!title){
+            return res.status(400).json({
+                msg: "title is required"
+            })
+        }
+
+        const findSection = await prisma.sections.findUnique({
+            where: {
+                id: sectionId
+            }
+        })
+
+        if(!sectionId){
+            return res.status(400).json({
+                msg: "Section not found"
+            })
+        }
+
+        const updatedSection = await prisma.sections.update({
+            where: {
+                id: sectionId
+            },
+             
+                data: {
+                    title
+                }
+            
+        })
+        return res.status(200).json({
+            msg: "section updated successfully",
+            updatedSection
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        })
+    }
+}
