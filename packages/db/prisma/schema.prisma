@@ -33,6 +33,10 @@ model Org {
   boards      Boards[]
 }
 
+enum Role{
+  ADMIN
+  MEMBER
+}
 
 model Membership {
   id       String @id @default(uuid())
@@ -43,7 +47,7 @@ model Membership {
   orgId    String
   org      Org    @relation(fields: [orgId], references: [id])
 
-  role     String
+  role     Role
   accepted Boolean
 }
 

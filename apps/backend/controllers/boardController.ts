@@ -75,3 +75,42 @@ export const getBoardController = async (req: Request<{orgId: string}>, res: Res
         
     }
 }
+
+export const deleteBoardController = async (req: Request<{boardId: string}>, res: Response) => {
+    try {
+        const {boardId} = req.params;
+
+        if(!boardId){
+            return res.status(400).json({
+                msg: "boardId is required"
+            })
+        }
+
+        const findBoard = await prisma.boards.findUnique({
+            where: {
+                id: boardId
+            }
+        })
+
+        if(!findBoard){
+            return res.status(400).json({
+                msg: "Board not found"
+            })
+        }
+
+        await prisma.boards.delete({
+            where: {
+                id: boardId
+            }
+        })
+
+        return res.status(200).json({
+            msg: "Board deleted successfully"
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        })
+    }
+}
