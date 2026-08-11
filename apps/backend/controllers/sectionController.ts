@@ -42,3 +42,77 @@ export const addSectionController = async (req: Request, res: Response) => {
     }
 
 }
+
+export const getSectionController = async (req: Request<{sectionId: string}>, res: Response) => {
+    try {
+        const {sectionId} = req.params;
+        if(!sectionId){
+            return res.status(400).json({
+                msg: "id is required"
+            })
+        }
+
+        const findSection = await prisma.sections.findUnique({
+            where: {
+                id: sectionId
+            }
+        })
+
+        if(!findSection){
+            return res.status(400).json({
+                msg: "Section not found"
+            })
+        }
+
+        const sections = await prisma.sections.findMany({
+            where: {
+                id: sectionId
+            }
+        })
+        return res.status(200).json({
+            msg: "Section fetched successfully",
+            sections
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        })
+    }
+}
+
+export const deleteSectionController = async (req: Request, res: Response) => {
+    try {
+        const {sectionId} = req.body
+        if(!sectionId){
+            return res.status(400).json({
+                msg: "section id is required"
+            })
+        }
+
+        const findSection = await prisma.sections.findUnique({
+            where: {
+                id: sectionId
+            }
+        })
+        if(!sectionId){
+            return res.status(400).json({
+                msg: "section not found"
+            })
+        }
+
+        await prisma.sections.delete({
+            where: {
+                id: sectionId
+            }
+        })
+        return res.status(200).json({
+            msg: "Section deleted successfully"
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        })
+    }
+}

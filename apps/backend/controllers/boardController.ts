@@ -63,13 +63,14 @@ export const getBoardController = async (req: Request<{orgId: string}>, res: Res
 
         const boards = await prisma.boards.findMany({
              where: {
-                orgId: orgId
+                id: orgId
             }
         }
            
         )
         return res.status(200).json({
-            msg: "Boards fetched successfully"
+            msg: "Boards fetched successfully",
+            boards
         })
     } catch (error) {
         
