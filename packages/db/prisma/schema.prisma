@@ -15,49 +15,71 @@ datasource db {
 }
 
 
-model User{
-  id               String              @id     @default(uuid())
-  username         String               @unique
-  password         String
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+  password String
+
+  memberships Membership[]
 }
 
-model Org{
-  id                String              @id    @default(uuid())
-  orgname           String              
-  description       String
+
+model Org {
+  id          String @id @default(uuid())
+  orgname     String
+  description String
+
+  memberships Membership[]
+  boards      Boards[]
 }
 
-model Membership{
-  id                String              @id    @default(uuid())
-  userId            Int                 @unique
-  user              User                @relation(fields: [userId], references: [id])
-  orgId             Int                 @unique
-  org               Org                 @relation(fields: [orgId], references: [id])
-  role              String
-  accepted          Boolean
+
+model Membership {
+  id       String @id @default(uuid())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+
+  orgId    String
+  org      Org    @relation(fields: [orgId], references: [id])
+
+  role     String
+  accepted Boolean
 }
 
-model Boards{
-  id                String              @id    @default(uuid())
-  title             String
-  orgId             Int                 @unique
-  org               Org                 @relation(fields: [orgId], references: [id])
+
+model Boards {
+  id    String @id @default(uuid())
+  title String
+
+  orgId String
+  org   Org @relation(fields: [orgId], references: [id])
+
+  sections Sections[]
+  issues   Issue[]
 }
 
-model Sections{
-  id              String                @id       @default(uuid())
-  title           String    
-  boardId         Int                   @unique
-  board           Boards                @relation(fields: [boardId], references: [id])
+
+model Sections {
+  id    String @id @default(uuid())
+  title String
+
+  boardId String
+  board   Boards @relation(fields: [boardId], references: [id])
+
+  issues Issue[]
 }
 
-model Issue{
-  id                String               @id    @default(uuid())
-  title             String
-  description       String
-  boardId           Int                  @unique
-  board           Boards                 @relation(fields: [boardId], references: [id])
-  sectionId         Int                  @unique
-  section           Sections             @relation(fields: [sectionId], references: [id])
+
+model Issue {
+  id          String @id @default(uuid())
+  title       String
+  description String
+
+  boardId String
+  board   Boards @relation(fields: [boardId], references: [id])
+
+  sectionId String
+  section   Sections @relation(fields: [sectionId], references: [id])
 }
 

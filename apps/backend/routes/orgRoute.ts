@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import { createOrgController } from '../controllers/orgController'
+import { createOrgController, deleteOrgController } from '../controllers/orgController'
 import { authMiddleware } from '../middleware/auth'
 const orgRouter = Router()
 

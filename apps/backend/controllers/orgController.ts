@@ -27,7 +27,7 @@ export const createOrgController = async(req: Request, res: Response) => {
     }
 }
 
-export const deletOrgController = async(req: Request<{orgId: string}>, res: Response) => {
+export const deleteOrgController = async(req: Request<{orgId: string}>, res: Response) => {
     try {
         const {orgId} = req.params;
         const findOrg = await prisma.org.findUnique({
