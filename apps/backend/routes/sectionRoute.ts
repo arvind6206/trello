@@ -5,7 +5,7 @@ const sectionRouter = Router()
 sectionRouter.post('/add', addSectionController)
 sectionRouter.get('/:id', getSectionController)
 sectionRouter.delete('/:id', deleteSectionController)
-sectionRouter.put('/:id', updateSectionController)
+sectionRouter.put('/', updateSectionController)
 
 
 

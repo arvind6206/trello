@@ -21,6 +21,9 @@ model User {
   password String
 
   memberships Membership[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 
@@ -31,6 +34,9 @@ model Org {
 
   memberships Membership[]
   boards      Boards[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role{
@@ -49,6 +55,11 @@ model Membership {
 
   role     Role
   accepted Boolean
+
+  @@unique([userId, orgId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 
@@ -61,17 +72,23 @@ model Boards {
 
   sections Sections[]
   issues   Issue[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 
 model Sections {
-  id    String @id @default(uuid())
-  title String
-
-  boardId String
-  board   Boards @relation(fields: [boardId], references: [id])
+  id          String @id @default(uuid())
+  title       String
+  position    Int
+  boardId     String
+  board       Boards @relation(fields: [boardId], references: [id])
 
   issues Issue[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 
@@ -79,11 +96,15 @@ model Issue {
   id          String @id @default(uuid())
   title       String
   description String
+  position    Int
 
   boardId String
   board   Boards @relation(fields: [boardId], references: [id])
 
   sectionId String
   section   Sections @relation(fields: [sectionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 

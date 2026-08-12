@@ -4,7 +4,7 @@ import { authMiddleware } from '../middleware/auth'
 const orgRouter = Router()
 
 orgRouter.post('/create',authMiddleware, createOrgController)
-orgRouter.delete('/:id',authMiddleware, deleteOrgController)
+orgRouter.delete('/:orgId',authMiddleware, deleteOrgController)
 
 
 export default orgRouter

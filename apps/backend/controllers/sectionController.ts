@@ -81,9 +81,9 @@ export const getSectionController = async (req: Request<{sectionId: string}>, re
     }
 }
 
-export const deleteSectionController = async (req: Request, res: Response) => {
+export const deleteSectionController = async (req: Request<{sectionId: string}>, res: Response) => {
     try {
-        const {sectionId} = req.body
+        const {sectionId} = req.params
         if(!sectionId){
             return res.status(400).json({
                 msg: "section id is required"

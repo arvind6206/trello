@@ -54,6 +54,7 @@ export const addIssueController = async (req: Request, res: Response) => {
   }
 };
 
+
 export const getIssueController = async (req: Request<{issueId: string}>, res: Response) => {
   try {
     const { issueId } = req.params;
@@ -78,6 +79,51 @@ export const getIssueController = async (req: Request<{issueId: string}>, res: R
     return res.status(200).json({
         msg: "Issue fetched successfully",
         findIssue
+    })
+
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({
+        msg: "Internal Server Error"
+    })
+  }
+};
+
+
+export const updateIssueController = async (req: Request<{issueId: string}>, res: Response) => {
+  try {
+    const { title, description, issueId } = req.body;
+    if (!issueId || !title || !description) {
+      return res.status(400).json({
+        msg: "These fields are required",
+      });
+    }
+
+    const findIssue = await prisma.issue.findUnique({
+      where: {
+        id: issueId,
+      },
+    });
+
+    if(!findIssue){
+        return res.status(400).json({
+            msg: "issue not found"
+        })
+    }
+
+    const updatedIssue = await prisma.issue.update({
+        where: {
+            id: issueId
+        }, 
+        data:{
+            title,
+            description
+        }
+    })
+
+    return res.status(200).json({
+        msg: "Issue updateded successfully",
+        updatedIssue
     })
 
   } catch (error) {
