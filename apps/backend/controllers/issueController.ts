@@ -54,7 +54,6 @@ export const addIssueController = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getIssueController = async (req: Request<{issueId: string}>, res: Response) => {
   try {
     const { issueId } = req.params;
@@ -88,6 +87,8 @@ export const getIssueController = async (req: Request<{issueId: string}>, res: R
     })
   }
 };
+
+
 
 
 export const updateIssueController = async (req: Request<{issueId: string}>, res: Response) => {
