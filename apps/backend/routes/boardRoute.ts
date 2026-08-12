@@ -1,12 +1,22 @@
-import {Router} from 'express'
-import { addBoardController, deleteBoardController, getBoardController, updateBoardController } from '../controllers/boardController'
+import { Router } from "express";
+import {
+    addBoardController,
+    deleteBoardController,
+    getBoardController,
+    getSingleBoardController,
+    updateBoardController
+} from "../controllers/boardController";
 
-const boardRouter = Router()
+const boardRouter = Router();
 
-boardRouter.post('/add', addBoardController)
-boardRouter.get('/', getBoardController)
-boardRouter.delete('/:id', deleteBoardController)
-boardRouter.put('/:id', updateBoardController)
+boardRouter.get("/org/:orgId", getBoardController);
 
+boardRouter.post("/org/:orgId", addBoardController);
 
-export default boardRouter
+boardRouter.get("/:boardId", getSingleBoardController);
+
+boardRouter.patch("/:boardId", updateBoardController);
+
+boardRouter.delete("/:boardId", deleteBoardController);
+
+export default boardRouter;
