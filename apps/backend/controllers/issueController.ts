@@ -99,6 +99,14 @@ export const addIssueController = async (req: Request, res: Response) => {
 export const getIssueController = async (req: Request<{issueId: string}>, res: Response) => {
   try {
     const { issueId } = req.params;
+    const userId = req.userId
+
+    if(!userId){
+      return res.status(400).json({
+        msg: "Unauthorized"
+      })
+    }
+
     if (!issueId) {
       return res.status(400).json({
         msg: "id is required",
@@ -109,13 +117,36 @@ export const getIssueController = async (req: Request<{issueId: string}>, res: R
       where: {
         id: issueId,
       },
+      include: {
+        board: true,
+        section: true
+      }
     });
 
-    if(!findIssue){
+      if(!findIssue){
         return res.status(400).json({
             msg: "issue not found"
         })
     }
+
+
+    const membership = await prisma.membership.findUnique({
+      where: {
+        userId_orgId: {
+          userId,
+          orgId: findIssue.board.orgId
+        }
+      }
+    })
+
+    if(!membership || !membership.accepted){
+      return res.status(400).json({
+        msg: "You don't have access to this issue"
+      })
+    }
+
+  
+
 
     return res.status(200).json({
         msg: "Issue fetched successfully",
@@ -130,49 +161,248 @@ export const getIssueController = async (req: Request<{issueId: string}>, res: R
   }
 };
 
+export const getAllIssueController = async (
+    req: Request<{ boardId: string }>,
+    res: Response
+) => {
+    try {
+        const { boardId } = req.params;
+        const userId = req.userId;
 
-
-
-export const updateIssueController = async (req: Request<{issueId: string}>, res: Response) => {
-  try {
-    const { title, description, issueId } = req.body;
-    if (!issueId || !title || !description) {
-      return res.status(400).json({
-        msg: "These fields are required",
-      });
-    }
-
-    const findIssue = await prisma.issue.findUnique({
-      where: {
-        id: issueId,
-      },
-    });
-
-    if(!findIssue){
-        return res.status(400).json({
-            msg: "issue not found"
-        })
-    }
-
-    const updatedIssue = await prisma.issue.update({
-        where: {
-            id: issueId
-        }, 
-        data:{
-            title,
-            description
+        if (!userId) {
+            return res.status(400).json({
+                msg: "Unauthorized"
+            });
         }
-    })
 
-    return res.status(200).json({
-        msg: "Issue updateded successfully",
-        updatedIssue
-    })
+        if (!boardId) {
+            return res.status(400).json({
+                msg: "boardId is required"
+            });
+        }
 
-  } catch (error) {
-    console.error(error)
-    return res.status(500).json({
-        msg: "Internal Server Error"
-    })
-  }
+        const board = await prisma.boards.findUnique({
+            where: {
+                id: boardId
+            }
+        });
+
+        if (!board) {
+            return res.status(400).json({
+                msg: "Board not found"
+            });
+        }
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_orgId: {
+                    userId,
+                    orgId: board.orgId
+                }
+            }
+        });
+
+        if (!membership) {
+            return res.status(400).json({
+                msg: "You are not a member of this organization"
+            });
+        }
+
+        if (!membership.accepted) {
+            return res.status(400).json({
+                msg: "Your membership has not been accepted"
+            });
+        }
+
+        const issues = await prisma.issue.findMany({
+            where: {
+                boardId
+            },
+            orderBy: {
+                position: "asc"
+            }
+        });
+
+        return res.status(200).json({
+            msg: "Issues fetched successfully",
+            issues
+        });
+
+    } catch (error) {
+        console.error("Error while fetching issues:", error);
+
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        });
+    }
+};
+
+
+
+export const updateIssueController = async (
+    req: Request<{ issueId: string }>,
+    res: Response
+) => {
+    try {
+        const { issueId } = req.params;
+        const { title, description } = req.body;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                msg: "Unauthorized"
+            });
+        }
+
+        if (!issueId) {
+            return res.status(400).json({
+                msg: "issueId is required"
+            });
+        }
+
+        if (!title && !description) {
+            return res.status(400).json({
+                msg: "At least one field is required"
+            });
+        }
+
+        const issue = await prisma.issue.findUnique({
+            where: {
+                id: issueId
+            }
+        });
+
+        if (!issue) {
+            return res.status(404).json({
+                msg: "Issue not found"
+            });
+        }
+
+        const board = await prisma.boards.findUnique({
+            where: {
+                id: issue.boardId
+            }
+        });
+
+        if (!board) {
+            return res.status(404).json({
+                msg: "Board not found"
+            });
+        }
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_orgId: {
+                    userId,
+                    orgId: board.orgId
+                }
+            }
+        });
+
+        if (!membership || !membership.accepted) {
+            return res.status(403).json({
+                msg: "You don't have access to this issue"
+            });
+        }
+
+        const updatedIssue = await prisma.issue.update({
+            where: {
+                id: issueId
+            },
+            data: {
+                title,
+                description
+            }
+        });
+
+        return res.status(200).json({
+            msg: "Issue updated successfully",
+            issue: updatedIssue
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        });
+    }
+};
+
+export const deleteIssueController = async (
+    req: Request<{ issueId: string }>,
+    res: Response
+) => {
+    try {
+        const { issueId } = req.params;
+        const userId = req.userId;
+
+        if (!userId) {
+            return res.status(400).json({
+                msg: "Unauthorized"
+            });
+        }
+
+        if (!issueId) {
+            return res.status(400).json({
+                msg: "issueId is required"
+            });
+        }
+
+        const issue = await prisma.issue.findUnique({
+            where: {
+                id: issueId
+            }
+        });
+
+        if (!issue) {
+            return res.status(400).json({
+                msg: "Issue not found"
+            });
+        }
+
+        const board = await prisma.boards.findUnique({
+            where: {
+                id: issue.boardId
+            }
+        });
+
+        if (!board) {
+            return res.status(400).json({
+                msg: "Board not found"
+            });
+        }
+
+        const membership = await prisma.membership.findUnique({
+            where: {
+                userId_orgId: {
+                    userId,
+                    orgId: board.orgId
+                }
+            }
+        });
+
+        if (!membership || !membership.accepted) {
+            return res.status(400).json({
+                msg: "You don't have access to this issue"
+            });
+        }
+
+        await prisma.issue.delete({
+            where: {
+                id: issueId
+            }
+        });
+
+        return res.status(200).json({
+            msg: "Issue deleted successfully"
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        return res.status(500).json({
+            msg: "Internal Server Error"
+        });
+    }
 };
