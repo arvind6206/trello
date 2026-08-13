@@ -1,4 +1,3 @@
-import { UserInclude } from "./../../../packages/db/generated/prisma/models/User";
 import { prisma } from "db/client";
 import { Request, Response } from "express";
 

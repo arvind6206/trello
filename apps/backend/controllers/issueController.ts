@@ -1,10 +1,18 @@
 import { prisma } from "db/client";
 import { Request, Response } from "express";
-import boardRouter from "../routes/boardRoute";
 
 export const addIssueController = async (req: Request, res: Response) => {
   try {
     const { title, description, boardId, sectionId } = req.body;
+
+    const userId = req.userId
+    if(!userId){
+      return res.status(400).json({
+        msg: "Unauthorized"
+      })
+    }
+
+
     if (!title || !description || !boardId || !sectionId) {
       return res.status(400).json({
         msg: "These fields are required",
@@ -16,10 +24,26 @@ export const addIssueController = async (req: Request, res: Response) => {
         id: boardId,
       },
     });
+
     if (!board) {
       return res.status(400).json({
         msg: "Board not found",
       });
+    }
+
+    const membership = await prisma.membership.findUnique({
+      where: {
+        userId_orgId: {
+          userId,
+          orgId: board.orgId
+        }
+      }
+    })
+
+    if(!membership || !membership.accepted){
+      return res.status(400).json({
+        msg: "You don't have access to this board"
+      })
     }
 
     const section = await prisma.sections.findUnique({
@@ -33,12 +57,30 @@ export const addIssueController = async (req: Request, res: Response) => {
       });
     }
 
+    if(section.boardId !== boardId){
+      return res.status(400).json({
+        msg: "Section does not belong to this board"
+      })
+    }
+
+    const lastIssue = await prisma.issue.findFirst({
+      where: {
+        sectionId
+      },
+      orderBy: {
+        position: "desc"
+      }
+    })
+
+    const position = lastIssue ? lastIssue.position + 1 : 0
+
     const issue = await prisma.issue.create({
       data: {
         title,
         description,
         boardId,
         sectionId,
+        position
       },
     });
 
