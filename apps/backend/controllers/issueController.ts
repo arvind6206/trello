@@ -13,9 +13,9 @@ export const addIssueController = async (req: Request, res: Response) => {
     }
 
 
-    if (!title || !description || !boardId || !sectionId) {
+    if (!title || !boardId || !sectionId) {
       return res.status(400).json({
-        msg: "These fields are required",
+        msg: "Title, boardId, and sectionId are required",
       });
     }
 

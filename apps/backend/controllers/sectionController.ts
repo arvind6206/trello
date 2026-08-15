@@ -49,15 +49,23 @@ export const addSectionController = async (
       });
     }
 
+    // Get the current highest position for this board
+    const highestPosition = await prisma.sections.findFirst({
+      where: { boardId },
+      orderBy: { position: 'desc' }
+    });
+
+    const newPosition = highestPosition ? highestPosition.position + 1 : 0;
+
     const section = await prisma.sections.create({
       data: {
         title,
         boardId,
-        position: 0,
+        position: newPosition,
       },
     });
 
-    return res.status(200).json({
+    return res.status(201).json({
       msg: "Section created successfully",
       section,
     });
@@ -155,7 +163,7 @@ export const getAllSectionController = async (
       });
     }
 
-    if (boardId) {
+    if (!boardId) {
       return res.status(400).json({
         msg: "boardId is required",
       });
@@ -183,8 +191,15 @@ export const getAllSectionController = async (
     });
 
     if (!membership) {
-      return res.status(400).json({
+      console.error(`No membership found for userId: ${userId}, orgId: ${findBoard.orgId}`);
+      return res.status(403).json({
         msg: "You don't have access to this board",
+      });
+    }
+
+    if (!membership.accepted) {
+      return res.status(403).json({
+        msg: "Your membership has not been accepted",
       });
     }
 
@@ -261,17 +276,19 @@ export const deleteSectionController = async (
     });
 
     if (!membership || !membership.accepted) {
-      return res.status(400).json({
-        msg: "You don't have access to thi section",
+      return res.status(403).json({
+        msg: "You don't have access to this section",
       });
     }
 
-    if (membership.role !== "ADMIN") {
-      return res.status(400).json({
-        msg: "Only admins can ddelete section",
-      });
-    }
+    // Delete all issues in the section first due to foreign key constraint
+    await prisma.issue.deleteMany({
+      where: {
+        sectionId: sectionId,
+      },
+    });
 
+    // Now delete the section
     await prisma.sections.delete({
       where: {
         id: sectionId,
@@ -349,12 +366,6 @@ export const updateSectionController = async (
     if (!membership || !membership.accepted) {
       return res.status(403).json({
         msg: "You don't have access to this section",
-      });
-    }
-
-    if (membership.role !== "ADMIN") {
-      return res.status(403).json({
-        msg: "Only admins can update a section",
       });
     }
 

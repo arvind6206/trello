@@ -6,17 +6,18 @@ import {
     getSingleBoardController,
     updateBoardController
 } from "../controllers/boardController";
+import { authMiddleware } from "../middleware/auth";
 
 const boardRouter = Router();
 
-boardRouter.get("/org/:orgId", getBoardController);
+boardRouter.get("/org/:orgId", authMiddleware, getBoardController);
 
-boardRouter.post("/org/:orgId", addBoardController);
+boardRouter.post("/org/:orgId", authMiddleware, addBoardController);
 
-boardRouter.get("/:boardId", getSingleBoardController);
+boardRouter.get("/:boardId", authMiddleware, getSingleBoardController);
 
-boardRouter.patch("/:boardId", updateBoardController);
+boardRouter.patch("/:boardId", authMiddleware, updateBoardController);
 
-boardRouter.delete("/:boardId", deleteBoardController);
+boardRouter.delete("/:boardId", authMiddleware, deleteBoardController);
 
 export default boardRouter;
